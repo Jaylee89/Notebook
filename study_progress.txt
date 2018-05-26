@@ -1,0 +1,92 @@
+2018-05-23, 将要学习05课程
+2018-05-24, 将要学习08课程
+2018-05-25, 将要学习16课程
+
+
+//===========================
+笔记:
+
+加载配置文件入口:
+1, 传统方式
+    ApplicationContext applicationContext = new ClassPathXmlApplicationContext("beans.xml");
+    Person bean = (Person) applicationContext.getBean("person");
+    System.out.println(bean);
+        
+2, 直接加载注解配置文件
+    ApplicationContext applicationContext = new AnnotationConfigApplicationContext(MainConfig.class);
+    Person bean = applicationContext.getBean(Person.class);
+    System.out.println(bean);
+    
+    String[] namesForType = applicationContext.getBeanNamesForType(Person.class);
+    for (String name : namesForType) {
+        System.out.println(name);
+    }
+
+@Configuration                        //告诉Spring这是一个配置类
+@ComponentScans                       //定义扫面范围,数组
+@ComponentScan                        //定义扫描规则, 可以指定扫描规则
+
+@Filter(type=FilterType.ANNOTATION,classes={Controller.class}),
+@Filter(type=FilterType.ASSIGNABLE_TYPE,classes={BookService.class}),
+@Filter(type=FilterType.CUSTOM,classes={MyTypeFilter.class}), MyTypeFilter.class implements TypeFilter.class
+
+@Bean("person")                       //给容器中注册一个Bean; 类型为返回值的类型，id默认是用方法名作为id (首字母小写), 一般用于导入的第三方包的组件
+
+@Controller                           //自定义组件
+@Service
+@Repository
+@Component                            //自定义组件
+
+@Import[快速给容器中导入组件01, 快速给容器中导入组件02, 快速给容器中导入组件03]
+* 1）、@Import(要导入到容器中的组件)；容器中就会自动注册这个组件，id默认是全类名
+* 2）、ImportSelector:返回需要导入的组件的全类名数组；override selectImports(AnnotationMetadata anno) method, then return a sting array
+        AnnotationMetadata可以将当前标注@Import注解的类的所有注解信息拿到
+* 3）、ImportBeanDefinitionRegistrar:手动注册bean到容器中
+        AnnotationMetadata：当前类的注解信息
+	    BeanDefinitionRegistry:BeanDefinition注册类；
+	   	    把所有需要添加到容器中的bean；调用
+	   	    BeanDefinitionRegistry.registerBeanDefinition手工注册进来
+            RootBeanDefinition来指定bean的信息(类型,作用域等)
+
+使用Spring提供的 FactoryBean（工厂Bean）;
+* 1）、默认获取到的是工厂bean调用getObject创建的对象, 返回的是工厂Bean对应的具体实例
+* 2）、要获取工厂Bean本身，我们需要给id前面加一个&colorFactoryBean, 可参考BeanFactory里的设计,有个&作为前缀, 此时返回的是工厂Bean
+
+@Autowired                            //默认以类型注入
+@Resources                            //作为@Resource的集合, 只适用于@Target({TYPE})
+@Resource                             //默认按名注入, 适用于@Target({TYPE(类), FIELD(字段), METHOD(方法)})
+
+@Scope                                //默认是singleton
+
+* prototype：多实例的：ioc容器启动并不会去调用方法创建对象放在容器中, 
+* 			     每次获取的时候才会调用方法创建对象；
+* singleton：单实例的（默认值）：ioc容器启动会调用方法创建对象放到ioc容器中。
+* 			   以后每次获取就是直接从容器（map.get()）中拿
+* request：  同一次请求创建一个实例
+* session：  同一个session创建一个实例
+     
+@Lazy                                 //懒加载, 针对于单实例bean尔存在, 由于单实例默认在容器启动的时候创建对象；
+                                      //懒加载的目的：容器启动不创建对象。第一次使用(获取)Bean时创建对象，并初始化
+
+@Conditional({`Condition.class`})     //类中组件统一设置。满足当前条件，这个类中配置的所有bean注册才能生效
+                                      //在arguments里面添加运行时变量, -Dos.name=linux
+
+
+@Bean的生命周期:
+    创建 <--> 初始化(可自定义) <--> 销毁(可自定义)
+    整个过程由容器来管理
+    xml: init-method="" destory-method="", 无参方法,可抛异常
+    注解: 
+        1) @Bean(initMethod="init", destoryMethod="destory")
+           P.S. 当scope是多实例的Bean只有在调用的时候才会初始化,然而不会摧毁(容器只负责创建和初始化),得手动调用destory
+        2) 让Bean来实现InitializingBean(afterPropertiesSet())和DisposableBean(destory()) 来动态调用init和destory
+        3) JSR250规范(标注在方法上), @PostConstruct(executed after dependency injection is done) 和 @PreDestory
+        4) BeanPostProcessor[interface], Bean的初始化前后做一些处理
+           postProcessBeforeInitialization: run before afterPropertiesSet, initMethod
+           postProcessAfterInitialization:  run after afterPropertiesSet, initMethod
+           
+           注意: 如果实现了这个接口，每个实例都会调用，这个接口的实现更像一个切面
+    
+
+
+
