@@ -285,13 +285,17 @@ Spring底层对 BeanPostProcessor 的使用；
             2）2.1 prepareBeanFactory
  * 		3）、registerBeanPostProcessors(beanFactory);注册bean的后置处理器来方便拦截bean的创建；
  * 			1）、先获取ioc容器已经定义了的需要创建对象的所有BeanPostProcessor
+                 [org.springframework.context.annotation.internalAutowiredAnnotationProcessor,
+                    org.springframework.context.annotation.internalRequiredAnnotationProcessor,
+                    org.springframework.context.annotation.internalCommonAnnotationProcessor,
+                    org.springframework.aop.config.internalAutoProxyCreator]
  * 			2）、给容器中加别的BeanPostProcessor
  * 			3）、优先注册实现了PriorityOrdered接口的BeanPostProcessor；
  * 			4）、再给容器中注册实现了Ordered接口的BeanPostProcessor；
  * 			5）、注册没实现优先级接口的BeanPostProcessor； -> BeanPostProcessorChecker
  * 			6）、注册BeanPostProcessor，实际上就是创建BeanPostProcessor对象，保存在容器中；
  * 				创建internalAutoProxyCreator的BeanPostProcessor【AnnotationAwareAspectJAutoProxyCreator】
- * 				1）、创建Bean的实例
+ * 				1）、创建Bean的实例(PostProcessorRegistrationDelegate.registerBeanPostProcessors -> BeanPostProcessor pp = beanFactory.getBean(ppName, BeanPostProcessor.class); L225)
  * 				2）、populateBean；给bean的各种属性赋值
  * 				3）、initializeBean：初始化bean；
  * 						1）、invokeAwareMethods()：处理Aware接口的方法回调
@@ -313,6 +317,10 @@ Spring底层对 BeanPostProcessor 的使用；
         ApplicationEventPublisherAware(publishEvent)
         MessageSourceAware(set MessageSource)
         ApplicationContextAware(set ApplicationContext)
-    
+
+[org.springframework.context.annotation.internalAutowiredAnnotationProcessor
+org.springframework.context.annotation.internalRequiredAnnotationProcessor
+org.springframework.context.annotation.internalCommonAnnotationProcessor
+org.springframework.aop.config.internalAutoProxyCreator]
     
     
